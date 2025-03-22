@@ -8,28 +8,27 @@ import os
 # Load environment variables
 load_dotenv()
 
-# Get the frontend URL from environment variables
-FRONTEND_URL = os.getenv('FRONTEND_URL')
-
-# Create flask app
 app = Flask(__name__)
 CORS(app)
+import os
+import pickle
 
-# Load the model
 model_path = os.path.join(os.path.dirname(__file__), 'model.pkl')
+
 if not os.path.isfile(model_path):
     raise FileNotFoundError(f"Model file not found at {model_path}")
 
 model = pickle.load(open(model_path, "rb"))
 
+
 @app.route("/")
 @cross_origin()
 def home():
-    return jsonify({'msg': 'Welcome to the Crop Prediction API'})
+    return jsonify({'msg':'this is home page'})
 
 @app.route("/api/predict", methods=["POST"])
 @cross_origin()
-def api_predict():
+def predict():
     try:
         print(f"Request Content-Type: {request.content_type}")
         print(f"Request Data: {request.data}")
@@ -71,3 +70,4 @@ def api_predict():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(debug=True, host='0.0.0.0', port=port)
+
