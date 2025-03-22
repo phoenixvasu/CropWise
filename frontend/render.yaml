@@ -1,0 +1,5 @@
+services:
+  - type: web
+    name: vite-frontend
+    env: static
+    staticPublishPath: dist
