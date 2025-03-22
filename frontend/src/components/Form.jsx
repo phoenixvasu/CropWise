@@ -13,6 +13,7 @@ const Form = () => {
   });
 
   const [prediction, setPrediction] = useState("");
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -21,18 +22,11 @@ const Form = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setFormData({
-      Nitrogen: "",
-      Phosphorus: "",
-      Potassium: "",
-      temperature: "",
-      humidity: "",
-      pH: "",
-      rainfall: "",
-    });
+    setError("");
+    setPrediction("");
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_FLASK_API_URL}`,
+        `${import.meta.env.VITE_FLASK_API_URL}/api/predict`,
         formData,
         {
           headers: {
@@ -44,7 +38,7 @@ const Form = () => {
       setPrediction(response.data?.prediction || "No prediction received.");
     } catch (error) {
       console.error("Error:", error);
-      setPrediction("Error fetching prediction.");
+      setError(error.response?.data?.error || "Error fetching prediction.");
     }
   };
 
@@ -79,6 +73,11 @@ const Form = () => {
         {prediction && (
           <p className="text-center mt-6 text-xl text-white font-semibold">
             Prediction: {prediction}
+          </p>
+        )}
+        {error && (
+          <p className="text-center mt-6 text-xl text-red-400 font-semibold">
+            Error: {error}
           </p>
         )}
       </div>

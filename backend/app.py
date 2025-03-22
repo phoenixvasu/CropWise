@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS, cross_origin
+from flask_cors import CORS
 from dotenv import load_dotenv
 import numpy as np
 import pickle
@@ -9,25 +9,23 @@ import os
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app)
-import os
-import pickle
 
+# Configure CORS to allow requests from the frontend URL
+FRONTEND_URL = os.getenv('FRONTEND_URL', '*')
+CORS(app, resources={r"/*": {"origins": FRONTEND_URL}})
+
+# Load the model
 model_path = os.path.join(os.path.dirname(__file__), 'model.pkl')
-
 if not os.path.isfile(model_path):
     raise FileNotFoundError(f"Model file not found at {model_path}")
 
 model = pickle.load(open(model_path, "rb"))
 
-
-@app.route("/")
-@cross_origin()
+@app.route("/", methods=["GET"])
 def home():
-    return jsonify({'msg':'this is home page'})
+    return jsonify({'msg': 'This is the home page'})
 
 @app.route("/api/predict", methods=["POST"])
-@cross_origin()
 def predict():
     try:
         print(f"Request Content-Type: {request.content_type}")
@@ -59,7 +57,7 @@ def predict():
         else:
             return jsonify({'error': 'Unsupported Media Type. Use JSON or form-data.'}), 415
 
-        # Prepare features and make a prediction
+        # Make a prediction
         features = [np.array(float_features)]
         prediction = model.predict(features)
         return jsonify({'prediction': prediction[0]})
@@ -70,4 +68,3 @@ def predict():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(debug=True, host='0.0.0.0', port=port)
-
